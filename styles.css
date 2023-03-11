@@ -1,0 +1,14 @@
+body {
+	display: flex;
+    flex-direction: column;
+    justify-content: center;
+	background-color: white;
+	color: black;
+	margin: auto;
+	margin-bottom: 3em;
+	text-align: center;
+	width: fit-content;
+    font-family: monospace;
+	font-size: 16px;
+}
+

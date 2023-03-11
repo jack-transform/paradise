@@ -1,0 +1,93 @@
+{
+	"fileName": "volitionRules",
+	"type": "volition",
+	"rules": [
+		{
+			"name": "People of opposite gender are attracted to each other (oof)",
+			"conditions": [
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "someone",
+					"value": true
+				},
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "other",
+					"value": false
+				}
+			],
+			"effects": [
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "someone",
+					"second": "other",
+					"weight": 5,
+					"intentType": true
+				},
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "other",
+					"second": "someone",
+					"weight": 5,
+					"intentType": true
+				}
+			],
+			"origin": "volitionRules",
+			"id": "volitionRules_1",
+			"type": "volition"
+		},
+		{
+			"name": "Unconfident people want to drink",
+			"conditions": [
+				{
+					"category": "stats",
+					"type": "confidence",
+					"first": "someone",
+					"value": 30,
+					"operator": "<"
+				}
+			],
+			"effects": [
+				{
+					"category": "stats",
+					"type": "intoxication",
+					"first": "someone",
+					"weight": 5,
+					"intentType": true
+				}
+			],
+			"origin": "volitionRules",
+			"id": "volitionRules_3",
+			"type": "volition"
+		},
+		{
+			"name": "New Volition Rule",
+			"conditions": [
+				{
+					"category": "feelings",
+					"type": "closeness",
+					"first": "someone",
+					"second": "other",
+					"value": 0
+				}
+			],
+			"effects": [
+				{
+					"category": "feelings",
+					"type": "closeness",
+					"first": "someone",
+					"second": "other",
+					"weight": 5,
+					"intentType": true
+				}
+			],
+			"origin": "volitionRules",
+			"id": "volitionRules_4",
+			"type": "volition"
+		}
+	]
+}
