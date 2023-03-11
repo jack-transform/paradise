@@ -1,76 +1,60 @@
 {
 	"schema": [
 		{
-			"actionable": false,
-			"directionType": "undirected",
-			"isBoolean": true,
-			"cloneEachTimeStep": true,
-			"category": "traits",
-			"types": [
-				"is_man"
-			],
-			"defaultValue": false
-		},
-		{
-			"actionable": true,
-			"directionType": "undirected",
+			"category": "feeling",
 			"isBoolean": false,
-			"cloneEachTimeStep": true,
-			"category": "stats",
-			"types": [
-				"anger",
-				"happiness",
-				"confidence",
-				"intoxication"
-			],
-			"defaultValue": 0,
-			"maxValue": 100,
-			"minValue": 0
-		},
-		{
-			"actionable": true,
 			"directionType": "directed",
-			"isBoolean": false,
-			"cloneEachTimeStep": true,
-			"category": "feelings",
-			"types": [
-				"friendship",
-				"attraction",
-				"jealousy",
-				"love",
-				"frustration"
-			],
+			"types": ["closeness", "attraction"],
 			"defaultValue": 0,
+			"minValue": 0,
 			"maxValue": 100,
-			"minValue": 0
+			"actionable": true
 		},
 		{
-			"actionable": true,
-			"directionType": "reciprocal",
-			"isBoolean": true,
-			"cloneEachTimeStep": true,
-			"category": "relationship statuses",
-			"types": [
-				"are_friends",
-				"are_together",
-				"are_flirting",
-				"are_in_love",
-				"are_fighting"
-			],
-			"defaultValue": false
-		}
+			"category" : "mood",
+			"isBoolean" : true,
+			"directionType" : "undirected",
+			"types": ["confident", "unsure"],
+			"actionable" : false,
+			"defaultValue" : false,
+			"duration" : 3
+		},
 		{
-			"actionable": true,
-			"directionType": "reciprocal",
+			"category" : "attribute",
+			"types" : ["strength", "intelligence"],
+			"isBoolean" : false,
+			"directionType" : "undirected",
+			"actionable" : true,
+			"defaultValue" : 0,
+			"maxValue" : 100,
+			"minValue" : 0
+		},
+		{
+			"category" : "trait",
+			"isBoolean" : true,
+			"directionType" : "undirected",
+			"types" : ["named hero", "named love", "named rival", "anyone"],
+			"actionable" : false,
+			"defaultValue" : false
+		},
+		{
+			"category": "socialRecordLabel",
+			"types": ["romantic-failure", "romantic-advance"],
 			"isBoolean": true,
-			"cloneEachTimeStep": true,
-			"category": "location statuses",
-			"types": [
-				"at_pool",
-				"at_bar",
-				"at_beach"
-			],
-			"defaultValue": false
+			"directionType": "directed",
+			"defaultValue": false,
+			"actionable": false,
+			"duration": 0
+		},
+		{
+			"category": "socialRecordLabelUndirected",
+			"types": ["embarrassing", "self-involved"],
+			"isBoolean": true,
+			"directionType": "undirected",
+			"defaultValue": false,
+			"actionable": false,
+			"duration": 0
 		}
 	]
 }
+

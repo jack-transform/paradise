@@ -1,16 +1,13 @@
 {
 	"cast": {
-		"michael": {
-			"name": "Michael"
+		"hero": {
+			"name": "You"
 		},
-		"andrew": {
-			"name": "Andrew"
+		"love": {
+			"name": "Love"
 		},
-		"casey": {
-			"name": "Casey"
-		},
-		"kira": {
-			"name": "Kira"
+		"rival": {
+			"name": "Rival"
 		}
 	}
 }

@@ -1,0 +1,76 @@
+{
+	"schema": [
+		{
+			"actionable": false,
+			"directionType": "undirected",
+			"isBoolean": true,
+			"cloneEachTimeStep": true,
+			"category": "traits",
+			"types": [
+				"is_man"
+			],
+			"defaultValue": false
+		},
+		{
+			"actionable": true,
+			"directionType": "undirected",
+			"isBoolean": false,
+			"cloneEachTimeStep": true,
+			"category": "stats",
+			"types": [
+				"anger",
+				"happiness",
+				"confidence",
+				"intoxication"
+			],
+			"defaultValue": 0,
+			"maxValue": 100,
+			"minValue": 0
+		},
+		{
+			"actionable": true,
+			"directionType": "directed",
+			"isBoolean": false,
+			"cloneEachTimeStep": true,
+			"category": "feelings",
+			"types": [
+				"friendship",
+				"attraction",
+				"jealousy",
+				"love",
+				"frustration"
+			],
+			"defaultValue": 0,
+			"maxValue": 100,
+			"minValue": 0
+		},
+		{
+			"actionable": true,
+			"directionType": "reciprocal",
+			"isBoolean": true,
+			"cloneEachTimeStep": true,
+			"category": "relationship statuses",
+			"types": [
+				"are_friends",
+				"are_together",
+				"are_flirting",
+				"are_in_love",
+				"are_fighting"
+			],
+			"defaultValue": false
+		}
+		{
+			"actionable": true,
+			"directionType": "reciprocal",
+			"isBoolean": true,
+			"cloneEachTimeStep": true,
+			"category": "location statuses",
+			"types": [
+				"at_pool",
+				"at_bar",
+				"at_beach"
+			],
+			"defaultValue": false
+		}
+	]
+}

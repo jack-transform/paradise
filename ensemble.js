@@ -863,6 +863,10 @@ var getSocialRecordCopy = function() {
 	return util.clone(socialRecord);
 }
 
+var getSocialRecord = function() {
+	return socialRecord;
+}
+
 var registerMaxValue = function (predicate) {
 	maxValues[predicate.category] = predicate.maxValue !== undefined ? predicate.maxValue : 100;
 };
@@ -1616,6 +1620,7 @@ var socialRecordInterface = {
 	init: init,
 	dumpSocialRecord: dumpSocialRecord,
 	getSocialRecordCopy: getSocialRecordCopy,
+	getSocialRecord: getSocialRecord,
 	getSocialRecordCopyAtTimestep: getSocialRecordCopyAtTimestep,
 
 	getCurrentTimeStep		: getCurrentTimeStep,
@@ -5830,6 +5835,7 @@ var ensembleInterface = {
 	clearHistory			: socialRecord.clearHistory,
 	getSocialRecordCopyAtTimestep	: socialRecord.getSocialRecordCopyAtTimestep,
 	getSocialRecordCopy		: socialRecord.getSocialRecordCopy,
+	getSocialRecord	        : socialRecord.getSocialRecord,
 	getCurrentTimeStep		: socialRecord.getCurrentTimeStep,
 	
 	addRules				: addRules,
