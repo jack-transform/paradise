@@ -7,9 +7,9 @@
 			"cloneEachTimeStep": true,
 			"category": "traits",
 			"types": [
-				"is_man"
+				"is_man", "is_person"
 			],
-			"defaultValue": false
+			"defaultValue": true
 		},
 		{
 			"actionable": true,
@@ -18,8 +18,7 @@
 			"cloneEachTimeStep": true,
 			"category": "stats",
 			"types": [
-				"anger",
-				"happiness",
+				"mood",
 				"confidence",
 				"intoxication"
 			],
@@ -49,7 +48,7 @@
 			"directionType": "reciprocal",
 			"isBoolean": true,
 			"cloneEachTimeStep": true,
-			"category": "relationship statuses",
+			"category": "relationship_status",
 			"types": [
 				"are_friends",
 				"are_together",
@@ -58,13 +57,13 @@
 				"are_fighting"
 			],
 			"defaultValue": false
-		}
+		},
 		{
 			"actionable": true,
-			"directionType": "reciprocal",
+			"directionType": "undirected",
 			"isBoolean": true,
 			"cloneEachTimeStep": true,
-			"category": "location statuses",
+			"category": "location_status",
 			"types": [
 				"at_pool",
 				"at_bar",

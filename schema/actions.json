@@ -1,6 +1,147 @@
 {
 	"fileName" : "actions.json",
 	"actions" : [
-
+		{
+			"name" : "RAISE_MOOD",
+			"intent" : {
+				"category" : "stats",
+				"type"  : "mood",
+				"intentType" : true,
+				"first" : "initiator"
+			},
+			"conditions" : [],
+			"influenceRules" : [],
+			"leadsTo" : ["EXERCISE"]
+		},
+		{
+			"name" : "RAISE_CONFIDENCE",
+			"intent" : {
+				"category" : "stats",
+				"type" : "confidence",
+				"intentType" : true,
+				"first" : "initiator"
+			},
+			"conditions" : [],
+			"influenceRules" : [],
+			"leadsTo" : ["DRINK"]
+		},
+		{
+			"name" : "BECOME_FRIEND",
+			"intent" : {
+				"category" : "relationship_status",
+				"type" : "are_friends",
+				"intentType" : true,
+				"first" : "initiator",
+				"second": "responder"
+			},
+			"conditions" : [],
+			"influenceRules" : [],
+			"leadsTo" : ["CHAT"]
+		},
+		{
+			"name" : "BECOME_ROMANTIC",
+			"intent" : {
+				"category" : "relationship_status",
+				"type" : "are_together",
+				"intentType" : true,
+				"first" : "initiator",
+				"second": "responder"
+			},
+			"conditions" : [],
+			"influenceRules" : [],
+			"leadsTo" : ["FLIRT"]
+		},
+		{
+			"name" : "EXERCISE",
+			"displayName" : "Exercise",
+			"successMessage" : "{initiator} went for a swim.",
+			"isAccept" : true,
+			"conditions" : [],
+			"influenceRules" : [],
+			"effects" : [{
+				"category" : "stats",
+				"type" : "mood",
+				"first" : "initiator",
+				"operator" : "+",
+				"value" : 10
+			}]
+		},
+		{
+			"name" : "CHAT",
+			"displayName" : "Chat",
+			"successMessage" : "{initiator} and {responder} talked for a bit.",
+			"isAccept" : true,
+			"conditions" : [],
+			"influenceRules" : [],
+			"effects" : [{
+				"category" : "feelings",
+				"type" : "friendship",
+				"first" : "initiator",
+				"second" : "responder",
+				"operator" : "+",
+				"value" : 10
+			},{
+				"category" : "feelings",
+				"type" : "friendship",
+				"first" : "responder",
+				"second" : "initiator",
+				"operator" : "+",
+				"value" : 10
+			}]
+		},
+		{
+			"name" : "FLIRT",
+			"displayName" : "Flirt",
+			"successMessage" : "{initiator} flirted with {responder}.",
+			"isAccept" : true,
+			"conditions" : [],
+			"influenceRules" : [],
+			"effects" : [{
+				"category" : "feelings",
+				"type" : "attraction",
+				"first" : "initiator",
+				"second" : "responder",
+				"operator" : "+",
+				"value" : 10
+			},{
+				"category" : "feelings",
+				"type" : "attraction",
+				"first" : "responder",
+				"second" : "initiator",
+				"operator" : "+",
+				"value" : 10
+			}]
+		},
+		{
+			"name" : "DRINK",
+			"displayName" : "Exercise",
+			"successMessage" : "{initiator} went for a swim.",
+			"isAccept" : true,
+			"conditions" : [],
+			"influenceRules" : [],
+			"effects" : [
+				{
+					"category" : "stats",
+					"type" : "mood",
+					"first" : "initiator",
+					"operator" : "+",
+					"value" : 5
+				},
+				{
+					"category" : "stats",
+					"type" : "intoxication",
+					"first" : "initiator",
+					"operator" : "+",
+					"value" : 10
+				},
+				{
+					"category" : "stats",
+					"type" : "confidence",
+					"first" : "initiator",
+					"operator" : "+",
+					"value" : 10
+				}
+			]
+		}
 	]
 }

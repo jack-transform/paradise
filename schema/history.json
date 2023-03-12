@@ -1,4 +1,21 @@
 {
 	"history": [
+		{
+			"pos": 0,
+			"data": [
+				{
+					"category" : "traits",
+					"type" : "is_man",
+					"first" : "kira",
+					"value" : false
+				},
+				{
+					"category" : "traits",
+					"type" : "is_man",
+					"first" : "casey",
+					"value" : false
+				}
+			]
+		}
 	]
 }

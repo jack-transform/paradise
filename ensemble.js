@@ -2928,6 +2928,10 @@ var clearRuleLibrary = function() {
 	util.resetIterator("rules");
 }
 
+var getRuleLibrary = function() {
+	return ruleLibrary;
+}
+
 var ruleLibraryInterface = {
 
 	predicateToEnglish : predicateToEnglish,
@@ -2942,7 +2946,8 @@ var ruleLibraryInterface = {
 	setRuleById: setRuleById,
 	deleteRuleById: deleteRuleById,
 
-	clearRuleLibrary: clearRuleLibrary
+	clearRuleLibrary: clearRuleLibrary,
+	getRuleLibrary: getRuleLibrary
 };
 
 /* test-code */
@@ -5812,6 +5817,7 @@ var ensembleInterface = {
 	runTriggerRules			: ruleLibrary.runTriggerRules,
 	ruleToEnglish			: ruleLibrary.ruleToEnglish,
 	predicateToEnglish		: ruleLibrary.predicateToEnglish,
+	getRuleLibrary          : ruleLibrary.getRuleLibrary,
 	
 	dumpSocialRecord		: socialRecord.dumpSocialRecord,
 	dumpActionLibrary		: actionLibrary.dumpActions,

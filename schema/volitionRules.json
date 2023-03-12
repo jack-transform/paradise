@@ -3,35 +3,21 @@
 	"type": "volition",
 	"rules": [
 		{
-			"name": "People of opposite gender are attracted to each other (oof)",
+			"name": "People want to feel confident",
 			"conditions": [
 				{
-					"category": "traits",
-					"type": "is_man",
+					"category": "stats",
+					"type": "confidence",
 					"first": "someone",
-					"value": true
-				},
-				{
-					"category": "traits",
-					"type": "is_man",
-					"first": "other",
-					"value": false
+					"operator": "<",
+					"value": 20
 				}
 			],
 			"effects": [
 				{
-					"category": "feelings",
-					"type": "attraction",
+					"category": "stats",
+					"type": "confidence",
 					"first": "someone",
-					"second": "other",
-					"weight": 5,
-					"intentType": true
-				},
-				{
-					"category": "feelings",
-					"type": "attraction",
-					"first": "other",
-					"second": "someone",
 					"weight": 5,
 					"intentType": true
 				}
@@ -41,21 +27,50 @@
 			"type": "volition"
 		},
 		{
-			"name": "Unconfident people want to drink",
+			"name": "People want to have a better mood",
 			"conditions": [
 				{
-					"category": "stats",
-					"type": "confidence",
+					"category": "traits",
+					"type": "is_person",
 					"first": "someone",
-					"value": 30,
-					"operator": "<"
+					"value": true
 				}
 			],
 			"effects": [
 				{
 					"category": "stats",
-					"type": "intoxication",
+					"type": "mood",
 					"first": "someone",
+					"weight": 5,
+					"intentType": true
+				}
+			],
+			"origin": "volitionRules",
+			"id": "volitionRules_2",
+			"type": "volition"
+		},
+		{
+			"name": "People want to be friends with everyone",
+			"conditions": [
+				{
+					"category": "traits",
+					"type": "is_person",
+					"first": "someone",
+					"value": true
+				},
+				{
+					"category": "traits",
+					"type": "is_person",
+					"first": "other",
+					"value": true
+				}
+			],
+			"effects": [
+				{
+					"category": "relationship_status",
+					"type": "are_friends",
+					"first": "someone",
+					"second": "other",
 					"weight": 5,
 					"intentType": true
 				}
@@ -65,20 +80,21 @@
 			"type": "volition"
 		},
 		{
-			"name": "New Volition Rule",
+			"name": "People want to be involved with people they're attracted to",
 			"conditions": [
 				{
 					"category": "feelings",
-					"type": "closeness",
+					"type": "attraction",
 					"first": "someone",
 					"second": "other",
-					"value": 0
+					"operator": ">",
+					"value": 5
 				}
 			],
 			"effects": [
 				{
-					"category": "feelings",
-					"type": "closeness",
+					"category": "relationship_status",
+					"type": "are_together",
 					"first": "someone",
 					"second": "other",
 					"weight": 5,

@@ -2,5 +2,81 @@
 	"fileName": "triggerRules",
 	"type": "trigger",
 	"rules": [
+		{
+			"name": "Men are attracted to women",
+			"conditions": [
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "someone",
+					"value": true
+				},
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "other",
+					"value": false
+				},
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "someone",
+					"second": "other",
+					"value": 10,
+					"operator": "<"
+				}
+			],
+			"effects": [
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "someone",
+					"second": "other",
+					"value": 10,
+					"operator": "="
+				}
+			],
+			"origin": "triggerRules",
+			"id": "triggerRules_1",
+			"type": "trigger"
+		},
+		{
+			"name": "Women are attracted to men",
+			"conditions": [
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "someone",
+					"value": false
+				},
+				{
+					"category": "traits",
+					"type": "is_man",
+					"first": "other",
+					"value": true
+				},
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "someone",
+					"second": "other",
+					"value": 10,
+					"operator": "<"
+				}
+			],
+			"effects": [
+				{
+					"category": "feelings",
+					"type": "attraction",
+					"first": "someone",
+					"second": "other",
+					"value": 10,
+					"operator": "="
+				}
+			],
+			"origin": "triggerRules",
+			"id": "triggerRules_2",
+			"type": "trigger"
+		}
 	]
 }
