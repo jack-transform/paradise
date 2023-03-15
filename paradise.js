@@ -20,6 +20,18 @@ class Utils {
 		}
 		return chosen ;
 	}
+
+	static format(str, fields) {
+		let s = str;
+		for (const field in fields) {
+			s = s.replace(`{${field}}`, fields[field])
+		}
+		return s;
+	}
+
+	static capitalize(str) {
+		return str.charAt(0).toUpperCase() + str.slice(1);
+	}
 }
 
 var displayStats = [
@@ -35,7 +47,11 @@ class UIManager {
 	constructor(onStep) {
 		let button = document.getElementById("stepButton");
 		button.onclick = onStep;
+		this.conversationActive = false;
 	}
+
+
+	// Characters
 
 	addEmptyCharacterCard(name) {
 		const characterTemplate = `
@@ -109,7 +125,7 @@ class UIManager {
 		relationshipElement.id = `${character}-${relationship}-relationship`;
 		relationshipElement.className = "column";
 		relationshipContainer.appendChild(relationshipElement);
-		relationshipElement.innerHTML = `<div class="relationship-label">${relationship}</div>`;
+		relationshipElement.innerHTML = `<div class="relationship-label">${Utils.capitalize(relationship)}</div>`;
 	}
 
 	addStatForCharacter(character, statName, displayType, recipient) {
@@ -140,7 +156,7 @@ class UIManager {
 		stat.id = id
 		stat.innerHTML = outerTemplate;
 
-		stat.getElementsByClassName("stat-label")[0].innerHTML = statName;
+		stat.getElementsByClassName("stat-label")[0].innerHTML = Utils.capitalize(statName);
 
 		let parent = document.getElementById(`${character}-self`);
 		if (recipient) {
@@ -174,7 +190,7 @@ class UIManager {
 			valueLabel.innerHTML = value
 		}
 		else {
-			valueLabel.innerHTML = `${value}/100`;
+			valueLabel.innerHTML = `${String(value).padStart(3, "0")}/100`;
 			let progress = stat.getElementsByClassName("stat-progressbar-progress")[0];
 			progress.style.width = `${value}%`;
 		}
@@ -211,12 +227,66 @@ class UIManager {
 			this.updateCharacter(character, stats[character])
 		}
 	}
+
+
+	// Action Log
+
+	logAction(name, action, description) {
+		let template = `
+		<div class="action-person">${Utils.capitalize(name)}</div>
+		<div class="action-name">${action}</div>
+		<div class="action-description">${description}</div>`
+
+		let actionElement = document.createElement("div");
+		actionElement.className = "row action"
+		actionElement.innerHTML = template;
+
+		let container = document.getElementById("action-container")
+		container.appendChild(actionElement)
+		actionElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
+
+	}
+
+	// Conversation Log
+
+	toggleConversation(initiator, recipient) {
+		let template = `<div class="conversation-announce">${Utils.capitalize(initiator)} and ${Utils.capitalize(recipient)} start a conversation.</div>`
+		if (this.conversationActive) {
+			template = `<div class="conversation-announce">${Utils.capitalize(initiator)} and ${Utils.capitalize(recipient)} end their conversation.</div>`
+		}
+		this.conversationActive = !this.conversationActive;
+	
+		let conversation = document.createElement("div");
+		conversation.className = "row conversation"
+		conversation.innerHTML = template;
+		let container = document.getElementById("conversation-container")
+		container.appendChild(conversation)
+	}
+
+	logConversation(name, text) {
+		let template = `
+		<div class="conversation-person">${Utils.capitalize(name)}</div>
+		<div class="conversation-words">${text}</div>`
+
+		let conversation = document.createElement("div");
+		conversation.className = "row conversation"
+		conversation.id = id
+		conversation.innerHTML = template;
+
+		let container = document.getElementById("conversation-container")
+		container.appendChild(conversation)
+	}
 }
 
 
 class Game {
 	constructor(){
-		this.simulation = new Simulation(() => this.updateCharacters())
+		this.simulation = new Simulation(
+			() => this.updateCharacters(),
+			(name, action, description) => this.logAction(name, action, description),
+			(name, text) => this.logConversation(name, text),
+			(initiator, recipient) => this.toggleConversation(initiator, recipient),
+		)
 		this.ui = new UIManager(() => this.step());
 	}
 
@@ -240,16 +310,32 @@ class Game {
 		this.ui.updateCharacters(state);
 	}
 
+	logAction(name, action, description){
+		this.ui.logAction(name, action, description);
+	}
+
+	logConversation(name, text) {
+		this.ui.logConversation(name, text);
+	}
+	
+	toggleConversation(initiator, recipient){
+		this.ui.toggleConversation(initiator, recipient);
+	}
+
 }
 
 class Simulation {
-	constructor(onCharacterUpdate) {
+	constructor(onCharacterUpdate, logAction, logConversation, toggleConversation) {
+		this.onCharacterUpdate = onCharacterUpdate;
+		this.logAction = logAction;
+		this.logConversation = logConversation;
+		this.loggleConversation = toggleConversation;
+
 		this.ensemble = ensemble;
 		this.prototypeSelf = {}
 		this.prototypeRelationship = {}
 		this.volitions = {}
 		this.turns = [],
-		this.onCharacterUpdate = onCharacterUpdate;
 		this.timer = 0;
 		this.characterFactory = new CharacterFactory();
 		this.characterBios = {}
@@ -342,8 +428,25 @@ class Simulation {
 	}
 
 	doAction(action) {
-		console.log(action);
+		if (action.additionalEffects) {
+			console.log("Were in");
+		}
 		this.ensemble.doAction(action);
+
+		let message = "...";
+		let name = "...";
+		if (action.successMessage) {
+			let bindings = action.goodBindings[0];
+			name = bindings["initiator"];
+			let format_data = {
+				"initiator": Utils.capitalize(bindings["initiator"]),
+				"responder": Utils.capitalize(bindings["responder"]),
+			};
+			message = Utils.format(action.successMessage, format_data)
+		}
+		this.logAction(name, action.name, message);
+
+
 		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
 		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
 	}
@@ -402,7 +505,6 @@ class Simulation {
 		this.turns = this.ensemble.getCharacters();
 		Utils.shuffle(this.turns)
 	}
-
 }
 
 class CharacterFactory {

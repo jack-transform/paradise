@@ -114,8 +114,8 @@
 		},
 		{
 			"name" : "DRINK",
-			"displayName" : "Exercise",
-			"successMessage" : "{initiator} went for a swim.",
+			"displayName" : "Drink",
+			"successMessage" : "{initiator} got a drink at the bar.",
 			"isAccept" : true,
 			"conditions" : [],
 			"influenceRules" : [],
@@ -141,7 +141,8 @@
 					"operator" : "+",
 					"value" : 10
 				}
-			]
+			],
+		    "additionalEffects": true
 		}
 	]
 }

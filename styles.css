@@ -89,3 +89,80 @@ body {
 .bio-container {
 	display:none;
 }
+
+#status-container {
+	min-width: 100%
+}
+
+#action-container {
+	min-width: 50%;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+#conversation-container {
+	min-width: 50%;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.action {
+	border: solid #32a1ce;
+	margin-left:5px;
+	margin-top:2px;
+	padding-left:5px;
+}
+
+.action-person {
+	font-weight:bold;
+	min-width: 5em;
+}
+.action-person {
+	font-weight:bold;
+	padding-right: 5px;
+}
+
+.action-name {
+	color: black;
+	font-weight: bold;
+	background-color: rgb(230, 230, 230);
+	padding-right: 5px;
+	padding-left: 5px;
+	min-width: 6em;
+	text-align: center;
+
+}
+
+.action-description {
+	min-width: 100%;
+	padding-right: 3em;
+	padding-left: 5px;
+}
+
+
+
+
+
+
+.conversation {
+	border: solid #32a1ce;
+	margin-left:5px;
+	margin-top:2px;
+	padding-left:5px;
+	max-width: 50%;
+
+}
+
+.conversation-person {
+	font-weight:bold;
+	min-width: 5em;
+}
+.conversation-words {
+	padding-right: 5px;
+	font-style:italic;
+}
+
+.conversation-announce {
+	font-weight:bold;
+	padding-right: 5px;
+}
