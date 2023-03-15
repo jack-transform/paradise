@@ -13,7 +13,6 @@ class UIManager {
 	constructor(onStep) {
 		let button = document.getElementById("stepButton");
 		button.onclick = onStep;
-		this.conversationActive = false;
 	}
 
 
@@ -215,18 +214,18 @@ class UIManager {
 
 	// Conversation Log
 
-	toggleConversation(initiator, recipient) {
+	setConversationActive(initiator, recipient, conversationActive) {
 		let template = `<div class="conversation-announce">${Utils.capitalize(initiator)} and ${Utils.capitalize(recipient)} start a conversation.</div>`
-		if (this.conversationActive) {
+		if (!conversationActive) {
 			template = `<div class="conversation-announce">${Utils.capitalize(initiator)} and ${Utils.capitalize(recipient)} end their conversation.</div>`
-		}
-		this.conversationActive = !this.conversationActive;
-	
+		}	
 		let conversation = document.createElement("div");
 		conversation.className = "row conversation"
 		conversation.innerHTML = template;
 		let container = document.getElementById("conversation-container")
 		container.appendChild(conversation)
+        conversation.scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
+
 	}
 
 	logConversation(name, text) {
@@ -236,11 +235,11 @@ class UIManager {
 
 		let conversation = document.createElement("div");
 		conversation.className = "row conversation"
-		conversation.id = id
 		conversation.innerHTML = template;
 
 		let container = document.getElementById("conversation-container")
 		container.appendChild(conversation)
+        conversation.scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
 	}
 }
 

@@ -110,7 +110,8 @@
 				"second" : "initiator",
 				"operator" : "+",
 				"value" : 10
-			}]
+			}],
+			"additionalEffects": true
 		},
 		{
 			"name" : "DRINK",
@@ -142,7 +143,7 @@
 					"value" : 10
 				}
 			],
-		    "additionalEffects": true
+		    "additionalEffects": false
 		}
 	]
 }

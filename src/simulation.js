@@ -1,12 +1,14 @@
 import CharacterFactory from "./character_factory.js";
+import PromptFactory from "./prompt_factory.js";
 import Utils from "./utils.js";
+import OpenAI from "./open_ai.js";
 
 class Simulation {
-	constructor(onCharacterUpdate, logAction, logConversation, toggleConversation) {
+	constructor(onCharacterUpdate, logAction, logConversation, setConversationActive) {
 		this.onCharacterUpdate = onCharacterUpdate;
 		this.logAction = logAction;
 		this.logConversation = logConversation;
-		this.loggleConversation = toggleConversation;
+		this.setConversationActive = setConversationActive;
 
 		this.ensemble = ensemble;
 		this.prototypeSelf = {}
@@ -15,7 +17,16 @@ class Simulation {
 		this.turns = [],
 		this.timer = 0;
 		this.characterFactory = new CharacterFactory();
+		this.openAI = new OpenAI();
 		this.characterBios = {}
+
+		this.conversationActive = false;
+		this.conversationHistory = [];
+		this.conversationInitiator = "";
+		this.conversationResponder = "";
+		this.conversationIsInitiatorTurn = false;
+		this.conversationTurnCount = 0;
+		
 	}
 
 	async loadConfiguration() {
@@ -90,7 +101,8 @@ class Simulation {
 	async initialize () {
 		return Promise.all([
 			this.loadConfiguration(),
-			this.loadCharacterFactory()
+			this.loadCharacterFactory(),
+			this.openAI.initialize(), 
 		]).then(function () {
 			this._loadStatePrototypes();
 			this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
@@ -106,7 +118,7 @@ class Simulation {
 
 	doAction(action) {
 		if (action.additionalEffects) {
-			console.log("Were in");
+			this.runAdditionalEffects(action)
 		}
 		this.ensemble.doAction(action);
 
@@ -165,7 +177,10 @@ class Simulation {
 	}
 
 	step() {
-		if (this.turns.length > 0) {
+		if (this.conversationActive) {
+			this.conversationStep();
+		}
+		else if (this.turns.length > 0) {
 			let turn = this.turns.pop()
 			this.takeTurn(turn);
 		} else {
@@ -181,6 +196,60 @@ class Simulation {
 	resetTurns() {
 		this.turns = this.ensemble.getCharacters();
 		Utils.shuffle(this.turns)
+	}
+	
+	resetConversation () {
+		this.conversationActive = false;
+		this.conversationHistory = [];
+		this.conversationInitiator = "";
+		this.conversationResponder = "";
+		this.conversationIsInitiatorTurn = true;
+		this.conversationTurnCount = 0;
+	}
+
+	startConversation(initiator, responder) {
+		this.conversationActive = true;
+		this.conversationHistory = [];
+		this.conversationInitiator = initiator;
+		this.conversationResponder = responder;
+		this.conversationIsInitiatorTurn = true;
+		this.conversationTurnCount = 0;
+		this.setConversationActive(initiator, responder, true);
+	}
+
+	runAdditionalEffects(action) {
+		let bindings = action.goodBindings[0];
+		let initiator = bindings["initiator"];
+		let responder = bindings["responder"];
+
+		if (action.name === "FLIRT") {
+			this.startConversation(initiator, responder);
+		}
+	}
+
+	conversationStep() {
+		let speaker = this.conversationResponder;
+		let listener = this.conversationInitiator;
+		if (this.conversationIsInitiatorTurn) {
+			speaker = this.conversationInitiator;
+			listener = this.conversationResponder;
+		}
+		let prompt = PromptFactory.speakerPromptFlirt(
+			speaker,
+			listener,
+			this.conversationHistory,
+			this.getState(),
+			this.characterBios
+		);
+
+		this.openAI.gptRequest(prompt).then((result) => {
+			console.log(result)
+			let dialogue = result["data"]["choices"][0]["text"]
+			this.logConversation(speaker, dialogue);
+			this.conversationHistory.push([speaker, dialogue])
+			this.conversationIsInitiatorTurn = !this.conversationIsInitiatorTurn;
+		});
+
 	}
 }
 

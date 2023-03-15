@@ -7,7 +7,7 @@ class Game {
             () => this.updateCharacters(),
             (name, action, description) => this.logAction(name, action, description),
             (name, text) => this.logConversation(name, text),
-            (initiator, recipient) => this.toggleConversation(initiator, recipient),
+            (initiator, recipient, conversationActive) => this.setConversationActive(initiator, recipient, conversationActive),
         )
         this.ui = new UIManager(() => this.step());
     }
@@ -40,8 +40,8 @@ class Game {
         this.ui.logConversation(name, text);
     }
 
-    toggleConversation(initiator, recipient) {
-        this.ui.toggleConversation(initiator, recipient);
+    setConversationActive(initiator, recipient, conversationActive) {
+        this.ui.setConversationActive(initiator, recipient, conversationActive);
     }
 
 }
