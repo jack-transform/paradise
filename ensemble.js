@@ -4255,7 +4255,7 @@ var isAccepted = function(key, initiator, responder, predicate) {
 	var returnObject = {};		
 	returnObject.accepted = acceptIfNoMatch;
 	returnObject.reasonsWhy = [];
-		
+	/*
 	var thisV = getFirstVolition(key, responder, initiator);
 	while (thisV !== undefined) {
 		if (thisV["category"] === predicate["category"] &&
@@ -4275,6 +4275,7 @@ var isAccepted = function(key, initiator, responder, predicate) {
 		}
 		thisV = getNextVolition(key, responder, initiator);
 	}
+	*/
 
 	return returnObject;
 };
