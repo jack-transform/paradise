@@ -2,7 +2,7 @@
 
 <html>
 <head>
-	<title>Lovers and Rivals</title>
+	<title>Paradise-Mini</title>
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 	<script src="ensemble.js"></script>
 	<script src="paradise.js"></script>
@@ -12,19 +12,29 @@
 
 </head>
 <body>
-
-	<div id="titleDiv">
-		<h1>Paradise-Mini</h1>
+	<div id="titleDiv" class="column">
+		<h1>🌴 Paradise-Mini 🍹</h1>
 		<p>A minimal simulation of Bachelor in Paradise</p>
 	</div>
 
-	<div id="locationContainer">
+	<div id="locations" class="row">
+		<div id="pool">🏊 Pool</div>
+		<div id="beach">🏖️ Beach</div>
+		<div id="dorm">🛏️ Dorm</div>
+		<div id="bar">🍸 Bar</div>
 	</div>
-
-	<div id="statusFeed">
-		<p id="statusMessage">Status updates will go here</p>
+	<div id="characterContainer" class="row">
 	</div>
+	<button id="stepButton">Step</button>
+	<div id="statusContainer" class="row">
+		<div id="actionContainer" class="column">
 
+		</div>
+		<div id="conversationContainer" class="column">
+			
+		</div>
+		
+	</div>
 
 </body>
 </html>

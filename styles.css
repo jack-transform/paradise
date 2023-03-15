@@ -1,14 +1,91 @@
-body {
-	display: flex;
-    flex-direction: column;
-    justify-content: center;
+body {	
 	background-color: white;
 	color: black;
 	margin: auto;
 	margin-bottom: 3em;
-	text-align: center;
 	width: fit-content;
     font-family: monospace;
 	font-size: 16px;
 }
 
+.column {
+	display:flex;
+	flex-direction: column;
+}
+
+.row {
+	display:flex;
+	flex-direction: row;
+}
+  
+  /* Clear floats after the columns */
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.stat-container {
+	padding-left: 2em;
+}
+.stat-label {
+	font-weight: bold;
+}
+.stat-body {
+	padding-left: 1em;
+}
+
+.stat-valuelabel {
+	padding-right: 2em;
+}
+
+.stat-progressbar {
+	background-color: rgb(230, 230, 230);
+	min-width: 150px;
+	height: 1em;
+}
+
+.stat-progressbar-progress {
+	background-color: grey;
+	width: 50%;
+	height: 1em;
+}
+
+.character-container {
+	border: solid #32a1ce;
+	margin-left:5px;
+	padding-left:5px;
+}
+
+.relationship-label {
+	padding-left:1em;
+}
+
+.character-emoji {
+	font-size: 3em;
+}
+
+.character-header {
+	text-align:center
+}
+
+.character-bio {
+	min-width:100%;
+	max-width:min-content;
+}
+
+.character-trait {
+	padding-left: 2em;
+}
+
+.character-traits-good {
+	color: green;
+}
+
+.character-traits-bad {
+	color: red;
+}
+
+.bio-container {
+	display:none;
+}

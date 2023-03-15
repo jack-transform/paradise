@@ -18,7 +18,7 @@
 					"category": "stats",
 					"type": "confidence",
 					"first": "someone",
-					"weight": 5,
+					"weight": 4,
 					"intentType": true
 				}
 			],
@@ -97,7 +97,7 @@
 					"type": "are_together",
 					"first": "someone",
 					"second": "other",
-					"weight": 5,
+					"weight": 7,
 					"intentType": true
 				}
 			],
