@@ -279,7 +279,7 @@ class Simulation {
 			initiator,
 			responder,
 			this.getState(),
-			this.characterBios
+			this.characterBios,
 		);
 		console.log(prompt);
 
@@ -321,6 +321,20 @@ class Simulation {
 				"second": initiator,
 				"value" : false
 			})
+			this.ensemble.set({
+				"category" : "relationships",
+				"type" : "in_conversation",
+				"first" : initiator,
+				"second": responder,
+				"value" : false
+			})
+			this.ensemble.set({
+				"category" : "relationship_status",
+				"type" : "in_conversation",
+				"first" : initiator,
+				"second": responder,
+				"value" : false
+			})
 			this.responseFunctionBase(speaker, listener, dialogue);
 			this.setConversationActive(speaker, listener, false);
 		});
@@ -342,6 +356,11 @@ class Simulation {
 		});
 	}
 
+	async whatWouldThisLooklike(speaker, listener, cleanup) {
+		speaker()
+		.results() 
+
+	}
 	dialogueExchange(speaker, listener, prompt, responseFunction) {
 		this.openAI.gptRequest(prompt)
 		.then((result) => {
@@ -352,11 +371,12 @@ class Simulation {
 			}
 			return dialogue;
 		}).then((dialogue) => {
-			responseFunction(speaker, listener, dialogue);
+			this.listenerUpdate(speaker, listener, dialogue)
+			.then(() => {responseFunction(speaker, listener, dialogue)});
 		})
 	}
 
-	responseFunctionBase(speaker, listener, dialogue) {
+	async responseFunctionBase(speaker, listener, dialogue) {
 		this.logConversation(speaker, dialogue);
 		this.conversationHistory.push([speaker, dialogue])
 		this.ensemble.set({
@@ -378,13 +398,41 @@ class Simulation {
 		this.setLocked(false);
 	}
 
-	conversationStep() {
-		let speaker = this.conversationResponder;
-		let listener = this.conversationInitiator;
-		if (this.conversationIsInitiatorTurn) {
-			speaker = this.conversationInitiator;
-			listener = this.conversationResponder;
-		}
+	async listenerUpdate(speaker, listener, dialogue) {
+
+		let prompt = PromptFactory.listenerPrompt(
+			speaker,
+			listener,
+			this.conversationHistory,
+			this.getState(),
+			this.characterBios,
+			dialogue,
+		)
+		return this.openAI.gptRequest(prompt)
+		.then((result) => {
+			console.log(result)
+			let assessment = result["data"]["choices"][0]["text"].trim().toLowerCase()
+			if (assessment === "negative") {
+				this.ensemble.set({
+					"category" : "feelings",
+					"type" : "attraction",
+					"first" : listener,
+					"second" : speaker,
+					"operator": "-",
+					"value" : 5,
+				})
+			} 
+			else if (assessment === "positive") {
+				this.ensemble.set({
+					"category" : "feelings",
+					"type" : "attraction",
+					"first" : listener,
+					"second" : speaker,
+					"operator": "+",
+					"value" : 5,
+				})
+			}
+		})
 	}
 }
 

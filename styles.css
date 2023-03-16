@@ -96,12 +96,14 @@ body {
 
 #action-container {
 	min-width: 50%;
+	min-height: 50px;
 	max-height: 200px;
 	overflow-y: auto;
 }
 
 #conversation-container {
 	min-width: 50%;
+	min-height: 50px;
 	max-height: 200px;
 	overflow-y: auto;
 }

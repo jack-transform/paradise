@@ -9,8 +9,8 @@
 					"category": "stats",
 					"type": "confidence",
 					"first": "someone",
-					"operator": "<",
-					"value": 20
+					"operator": ">",
+					"value": 0
 				}
 			],
 			"effects": [
@@ -18,7 +18,7 @@
 					"category": "stats",
 					"type": "confidence",
 					"first": "someone",
-					"weight": 20,
+					"weight": 5,
 					"intentType": true
 				}
 			],
@@ -97,7 +97,7 @@
 					"type": "are_together",
 					"first": "someone",
 					"second": "other",
-					"weight": 7,
+					"weight": 5,
 					"intentType": true
 				}
 			],
@@ -127,7 +127,7 @@
 				}
 			],
 			"origin": "volitionRules",
-			"id": "volitionRules_4",
+			"id": "volitionRules_5",
 			"type": "volition"
 		}
 	]
