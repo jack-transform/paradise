@@ -33,7 +33,7 @@ Your think of yourself as ${good_traits[0]} and ${good_traits[1]}, but those who
 Right now, you are flirting with ${listener}, a 20-something ${listener_gendered_descriptor}, to see if you have a connection.
 
 ${summary}
-What do you say next?
+What do you say next? Keep response to at most 2 sentences.
 ${Utils.capitalize(speaker)}: `
 
     }

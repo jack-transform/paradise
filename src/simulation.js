@@ -4,11 +4,12 @@ import Utils from "./utils.js";
 import OpenAI from "./open_ai.js";
 
 class Simulation {
-	constructor(onCharacterUpdate, logAction, logConversation, setConversationActive) {
+	constructor(onCharacterUpdate, logAction, logConversation, setConversationActive, setLocked) {
 		this.onCharacterUpdate = onCharacterUpdate;
 		this.logAction = logAction;
 		this.logConversation = logConversation;
 		this.setConversationActive = setConversationActive;
+		this.setLocked = setLocked;
 
 		this.ensemble = ensemble;
 		this.prototypeSelf = {}
@@ -98,6 +99,25 @@ class Simulation {
 		return character_states;
 	}
 
+	setStartingConditions () {
+		let genders = [true, false, true, false]
+		for (const is_man of genders) {
+			let data = this.characterFactory.newCharacter(!is_man);
+			let name = data["name"]
+			this.characterBios[name] = data;
+			this.ensemble.addCharacter(name, { "name": data["displayName"] })
+			if (!is_man) {
+				this.ensemble.set({
+					"category" : "traits",
+					"type" : "is_man",
+					"first" : name,
+					"value" : false
+				});
+			}
+		}
+		
+	}
+
 	async initialize () {
 		return Promise.all([
 			this.loadConfiguration(),
@@ -105,13 +125,9 @@ class Simulation {
 			this.openAI.initialize(), 
 		]).then(function () {
 			this._loadStatePrototypes();
+			this.setStartingConditions();
 			this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
 			// temp until character loading is finished
-			let state = this.getState();
-			for (const character of this.ensemble.getCharacters()) {
-				let charData = this.characterFactory.newCharacter(!state[character]["self"]["is_man"]);
-				this.characterBios[character] = charData;
-			}
 			this.resetTurns();
 		}.bind(this));
 	}
@@ -181,9 +197,11 @@ class Simulation {
 			this.conversationStep();
 		}
 		else if (this.turns.length > 0) {
+			this.setLocked(false);
 			let turn = this.turns.pop()
 			this.takeTurn(turn);
 		} else {
+			this.setLocked(false);
 			this.resetTurns();
 			this.nextTimeStep();
 		}
@@ -241,13 +259,17 @@ class Simulation {
 			this.getState(),
 			this.characterBios
 		);
-
+		
 		this.openAI.gptRequest(prompt).then((result) => {
 			console.log(result)
 			let dialogue = result["data"]["choices"][0]["text"]
+			if (dialogue.trim() === "") {
+				dialogue = Utils.sample(["Wow.", "Interesting."], 1)[0]
+			}
 			this.logConversation(speaker, dialogue);
 			this.conversationHistory.push([speaker, dialogue])
 			this.conversationIsInitiatorTurn = !this.conversationIsInitiatorTurn;
+			this.setLocked(false);
 		});
 
 	}

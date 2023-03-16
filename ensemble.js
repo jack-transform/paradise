@@ -5190,6 +5190,11 @@ var addCharacters = function(data) {
 	return getCharacters();
 };
 
+
+var addCharacter = function(name, metadata) {
+	savedChars[name] = metadata;
+};
+
 /**
  * @method getCharacters
  * @public
@@ -5806,6 +5811,7 @@ var ensembleInterface = {
 	isValidTypeForCategory		: isValidTypeForCategory,
 	updateCategory			: updateCategory,
 	addCharacters			: addCharacters,
+	addCharacter            : addCharacter,
 	getCharacters			: getCharacters,
 	getCharactersWithMetadata : getCharactersWithMetadata,
 	getCharData				: getCharData,

@@ -8,6 +8,7 @@ class Game {
             (name, action, description) => this.logAction(name, action, description),
             (name, text) => this.logConversation(name, text),
             (initiator, recipient, conversationActive) => this.setConversationActive(initiator, recipient, conversationActive),
+            (locked) => this.setLocked(locked),
         )
         this.ui = new UIManager(() => this.step());
     }
@@ -24,7 +25,12 @@ class Game {
     }
 
     step() {
-        this.simulation.step()
+        if (this.locked) {
+            console.log("locked!")
+        } else {
+            this.setLocked(true)
+            this.simulation.step()
+        }
     }
 
     updateCharacters() {
@@ -42,6 +48,11 @@ class Game {
 
     setConversationActive(initiator, recipient, conversationActive) {
         this.ui.setConversationActive(initiator, recipient, conversationActive);
+    }
+
+    setLocked(locked) {
+        this.locked = locked;
+        this.ui.lockStepButton(locked);
     }
 
 }

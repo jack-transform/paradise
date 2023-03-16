@@ -241,6 +241,13 @@ class UIManager {
 		container.appendChild(conversation)
         conversation.scrollIntoView({ behavior: "smooth", block: "end", inline: "end" });
 	}
+
+	// step button
+
+	lockStepButton(locked) {
+		let button = document.getElementById("stepButton");
+		button.disabled = locked;  
+	}
 }
 
 export default UIManager;
