@@ -244,7 +244,6 @@ class Simulation {
 		this.conversationHistory = [];
 		this.conversationInitiator = initiator;
 		this.conversationResponder = responder;
-		this.conversationIsInitiatorTurn = true;
 		this.conversationTurnCount = 0;
 		this.setConversationActive(initiator, responder, true);
 		this.ensemble.set({
@@ -275,9 +274,21 @@ class Simulation {
 			"operator": "=",
 			"value" : 10
 		})
-		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
-		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
-		this.setLocked(false);
+
+		let prompt = PromptFactory.speakerPromptInitiate(
+			initiator,
+			responder,
+			this.getState(),
+			this.characterBios
+		);
+		console.log(prompt);
+
+		this.dialogueExchange(initiator, responder, prompt,
+			(speaker, listener, dialogue) => {
+				this.conversationIsInitiatorTurn = false;
+				this.responseFunctionBase(speaker, listener, dialogue);
+			}
+		);
 	}
 
 	endConversation(initiator, responder) {
@@ -286,40 +297,52 @@ class Simulation {
 		this.conversationInitiator = "";
 		this.conversationResponder = "";
 		this.conversationTurnCount = 0;
-		this.setConversationActive(initiator, responder, false);
-		this.ensemble.set({
-			"category" : "relationship_status",
-			"type" : "in_conversation",
-			"first" : initiator,
-			"second": responder,
-			"value" : false
-		})
-		this.ensemble.set({
-			"category" : "relationship_status",
-			"type" : "in_conversation",
-			"first" : responder,
-			"second": initiator,
-			"value" : false
-		})
-		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
-		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
-		this.setLocked(false);
+		let prompt = PromptFactory.speakerPromptEnd(
+			initiator,
+			responder,
+			this.conversationHistory,
+			this.getState(),
+			this.characterBios
+		);
+
+		this.dialogueExchange(initiator, responder, prompt, 
+		(speaker, listener, dialogue) => {
+			this.ensemble.set({
+				"category" : "relationship_status",
+				"type" : "in_conversation",
+				"first" : initiator,
+				"second": responder,
+				"value" : false
+			})
+			this.ensemble.set({
+				"category" : "relationship_status",
+				"type" : "in_conversation",
+				"first" : responder,
+				"second": initiator,
+				"value" : false
+			})
+			this.responseFunctionBase(speaker, listener, dialogue);
+			this.setConversationActive(speaker, listener, false);
+		});
 	}
 
 	continueConversation(speaker, listener) {
-		let prompt = PromptFactory.speakerPromptFlirt(
+		let prompt = PromptFactory.speakerPromptTalk(
 			speaker,
 			listener,
 			this.conversationHistory,
 			this.getState(),
 			this.characterBios
 		);
+		console.log(prompt);
 
-		this.dialogueExchange(speaker, listener, prompt, () => {})
+		this.dialogueExchange(speaker, listener, prompt, 
+		(speaker, listener, dialogue) => {
+			this.responseFunctionBase(speaker, listener, dialogue);
+		});
 	}
 
 	dialogueExchange(speaker, listener, prompt, responseFunction) {
-
 		this.openAI.gptRequest(prompt)
 		.then((result) => {
 			console.log(result)
@@ -330,28 +353,29 @@ class Simulation {
 			return dialogue;
 		}).then((dialogue) => {
 			responseFunction(speaker, listener, dialogue);
-			return dialogue;
-		}).then((dialogue) => {
-			this.logConversation(speaker, dialogue);
-			this.conversationHistory.push([speaker, dialogue])
-			this.setLocked(false);
-			this.ensemble.set({
-				"category" : "internal",
-				"type" : "conversation_interest",
-				"first" : speaker,
-				"operator": "-",
-				"value" : 2
-			})
-			this.ensemble.set({
-				"category" : "internal",
-				"type" : "conversation_interest",
-				"first" : listener,
-				"operator": "-",
-				"value" : 2
-			})
-			this.ensemble.runTriggerRules(this.ensemble.getCharacters());
-			this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
-		});
+		})
+	}
+
+	responseFunctionBase(speaker, listener, dialogue) {
+		this.logConversation(speaker, dialogue);
+		this.conversationHistory.push([speaker, dialogue])
+		this.ensemble.set({
+			"category" : "internal",
+			"type" : "conversation_interest",
+			"first" : speaker,
+			"operator": "-",
+			"value" : 2
+		})
+		this.ensemble.set({
+			"category" : "internal",
+			"type" : "conversation_interest",
+			"first" : listener,
+			"operator": "-",
+			"value" : 2
+		})
+		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
+		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+		this.setLocked(false);
 	}
 
 	conversationStep() {
