@@ -2,6 +2,46 @@
 import Utils from './utils.js'
 class PromptFactory {
 
+    static relationship(cc, state, speaker, listener) {
+        let attraction = state[speaker]["relationships"][listener]["attraction"]
+        let friendship = state[speaker]["relationships"][listener]["friendship"]
+        
+        let attractionString = `You find ${listener} attractive`
+        if (attraction < 5) {
+            attractionString = `You aren't attracted to ${listener} at all`
+        } else if (attraction < 20) {
+            attractionString = `You aren't particularly attracted to ${listener}`
+        }  else if (attraction < 40) {
+            attractionString = `You find ${listener} reasonably attractive`
+        } else if (attraction < 60) {
+            attractionString = `You find ${listener} very attractive`
+        } else if (attraction < 80) {
+            attractionString = `You find ${listener} extremely attractive`
+        } else if (attraction < 100) {
+            attractionString = `You are desparately in love with ${listener}`
+        }
+
+        let friendshipString = `You don't know them well at all.`
+        if (friendship < 5) {
+            friendshipString = `You've never talked before.`
+        } else if (friendship < 20) {
+            friendshipString = `You don't know them well.`
+        }  else if (friendship < 40) {
+            friendshipString = `You've gotten to know each other a bit.`
+        } else if (friendship < 60) {
+            friendshipString = `You're pretty close with them.`
+        } else if (friendship < 80) {
+            friendshipString = `You have a strong relationship with them.`
+        } else if (friendship < 100) {
+            friendshipString = `You have an incredibly intense bond with them that you believe will last well past the show.`
+        }
+
+        if (cc.type === "CHAT") {
+            return friendshipString;
+        } else {
+            return `${attractionString}, but ${friendshipString.toLowerCase()}`
+        }
+    }
 
     static history(cc) {
         if (cc.history.length === 0) {
@@ -70,7 +110,7 @@ class PromptFactory {
         let bad_traits = cc.bios[speaker].badTraits;
         return `You are ${Utils.capitalize(speaker)}, a 20-something ${speaker_gendered_descriptor} on a dramatic reality TV dating show.
 
-You think of yourself as ${good_traits[0].toLowerCase()} and ${good_traits[1].toLowerCase()}, but sometims you can be ${bad_traits[0].toLowerCase()} and ${bad_traits[1].toLowerCase()}.
+You think of yourself as ${good_traits[0].toLowerCase()} and ${good_traits[1].toLowerCase()}, but sometimes you can be ${bad_traits[0].toLowerCase()} and ${bad_traits[1].toLowerCase()}.
 
 ${PromptFactory.status(state, speaker)}`
 }
@@ -81,11 +121,23 @@ ${PromptFactory.status(state, speaker)}`
             return "You found the last thing they said off-putting."
         }
         if (as === "positive") {
-            return "You're enjoying the flow of conversation."
+            return "You appreciated the last thing they said."
         }
         else {
-            return "You feel neutral about the conversation right now."
+            return "You feel indifferent about the last thing they said."
         }
+    }
+
+    static talkChat(cc, state) {
+        let listener = cc.listener();
+        let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
+        return `Right now, you are having a non-romantic chat with ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to get to know them better and maybe become friends.`
+    }
+
+    static talkFlirt(cc, state) {
+        let listener = cc.listener();
+        let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
+        return `Right now, you are flirting with ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to see if you have a connection.`
     }
 
     static talk(cc, state) {
@@ -93,10 +145,15 @@ ${PromptFactory.status(state, speaker)}`
         let speaker = cc.speaker();
         let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
         let summary = PromptFactory.history(cc)
-        let speakerAssesm
+
+        let talkPrompt = PromptFactory.talkFlirt(cc, state)
+        if (cc.type == "CHAT") {
+            talkPrompt = PromptFactory.talkChat(cc, state)
+        }
         return `${PromptFactory.base(cc, state, speaker)}
 
-Right now, you are flirting with ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to see if you have a connection.
+${talkPrompt}
+${PromptFactory.relationship(cc, state, speaker, listener)}
 
 ${summary}
 ${PromptFactory.assessment(cc, speaker)}
@@ -110,15 +167,21 @@ ${Utils.capitalize(speaker)}: `
         let speaker = cc.speaker();
         let listener = cc.listener();
         let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
-    
+        
+        let action = "to flirt and a build a romantic connection."
+        if (cc.type === "CHAT") {
+            action = "to have a friendly conversation."
+        }
+
         return `${PromptFactory.base(cc, state, speaker)}
 
-You just approached ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to flirt.
+You just approached ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to ${action}.
+${PromptFactory.relationship(cc, state, speaker, listener)}
 
 How do you open? Keep your response to at most a sentence, and try to be charismatic for the camera.
 
 Example response:
-${Utils.capitalize(speaker)}: "Wow, ${Utils.capitalize(listener)}, you're so beautiful." 
+${Utils.capitalize(speaker)}: "Wow, ${Utils.capitalize(listener)}, it's great to meet you." 
 
 Your response:
 ${Utils.capitalize(speaker)}: `
@@ -129,10 +192,11 @@ ${Utils.capitalize(speaker)}: `
         let listener = cc.listener();
         let summary = PromptFactory.history(cc)
         return `${PromptFactory.base(cc, state, speaker)}
-You're talking with ${Utils.capitalize(listener)}, but want to end the conversation.
+You're talking with ${Utils.capitalize(listener)}, but you think it's time to wrap up the conversation.
+${PromptFactory.relationship(cc, state, speaker, listener)}
 
 ${summary}
-How do you end the conversation? Keep your response to at most a sentence.
+How do you end the conversation? Keep your response to a few sentences, but make sure to address ${Utils.capitalize(listener)}'s most recent comments.
 
 Example response:
 ${Utils.capitalize(speaker)}: "Alright, ${Utils.capitalize(listener)}, it's been so great talking with you." 
@@ -146,6 +210,7 @@ ${Utils.capitalize(speaker)}: `
         let listener = cc.listener();
         return `${PromptFactory.base(cc, state, listener)}
 You're talking with ${Utils.capitalize(speaker)}, and need to decide how you feel about them; ${PromptFactory.assessment(cc, speaker)}
+${PromptFactory.relationship(cc, state, listener, speaker)}
 
 For each of ${Utils.capitalize(speaker)}'s comments, you have to decide how you feel.
 Do you think what ${Utils.capitalize(speaker)} makes you feel positive, negative, or neutral? Examples:

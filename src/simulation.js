@@ -136,6 +136,27 @@ class Simulation {
 					"value" : false
 				});
 			}
+			this.ensemble.set({
+				"category" : "stats",
+				"type" : "confidence",
+				"first" : name,
+				"operator": "=",
+				"value" : Math.floor(Math.random() * 101),
+			});
+			this.ensemble.set({
+				"category" : "stats",
+				"type" : "mood",
+				"first" : name,
+				"operator": "=",
+				"value" : Math.floor(Math.random() * 101),
+			});
+			this.ensemble.set({
+				"category" : "stats",
+				"type" : "intoxication",
+				"first" : name,
+				"operator": "=",
+				"value" : Math.floor(Math.random() * 101),
+			});
 		}
 		
 	}
@@ -344,14 +365,14 @@ class Simulation {
 				"type" : "conversation_interest",
 				"first" : this.cc.listener(),
 				"operator": "-",
-				"value" : 1
+				"value" : 2
 			})
 			this.ensemble.set({
 				"category" : "internal",
 				"type" : "conversation_interest",
 				"first" : this.cc.speaker(),
 				"operator": "-",
-				"value" : 1
+				"value" : 2
 			})
 			this.cleanupBase();
 			this.setLocked(false);
@@ -379,8 +400,25 @@ class Simulation {
 		this.logConversation(this.cc.speaker(), this.cc.lastDialogue);
 		this.cc.history.push([this.cc.speaker(), this.cc.lastDialogue])
 		this.cc.nextTurn()
+		this.ensemble.set({
+			"category" : "feelings",
+			"type" : "friendship",
+			"first" : this.cc.speaker(),
+			"second" : this.cc.listener(),
+			"operator": "+",
+			"value" : 5,
+		})
+		this.ensemble.set({
+			"category" : "feelings",
+			"type" : "friendship",
+			"first" : this.cc.listener(),
+			"second" : this.cc.speaker(),
+			"operator": "+",
+			"value" : 5,
+		})
 		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
 		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+		this.onCharacterUpdate();
 	}
 
 	async listenerUpdate() {
@@ -402,7 +440,7 @@ class Simulation {
 					"first" : this.cc.listener(),
 					"second" : this.cc.speaker(),
 					"operator": "-",
-					"value" : 5,
+					"value" : 10,
 				})
 				this.ensemble.set({
 					"category" : "internal",
@@ -413,6 +451,16 @@ class Simulation {
 				})
 			} 
 			else if (assessment === "positive") {
+				this.ensemble.set({
+					"category" : "feelings",
+					"type" : property,
+					"first" : this.cc.listener(),
+					"second" : this.cc.speaker(),
+					"operator": "+",
+					"value" : 10,
+				})
+			}
+			else if (assessment === "neutral") {
 				this.ensemble.set({
 					"category" : "feelings",
 					"type" : property,

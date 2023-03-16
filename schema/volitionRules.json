@@ -9,8 +9,8 @@
 					"category": "stats",
 					"type": "confidence",
 					"first": "someone",
-					"operator": ">",
-					"value": 0
+					"operator": "<",
+					"value": 10
 				}
 			],
 			"effects": [
@@ -18,7 +18,7 @@
 					"category": "stats",
 					"type": "confidence",
 					"first": "someone",
-					"weight": 5,
+					"weight": 10,
 					"intentType": true
 				}
 			],
