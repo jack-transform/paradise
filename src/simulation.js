@@ -3,6 +3,33 @@ import PromptFactory from "./prompt_factory.js";
 import Utils from "./utils.js";
 import OpenAI from "./open_ai.js";
 
+class ConversationContext {
+
+	constructor(initiator, responder, type, characterBios) {
+		this.type = type
+		this.history = [];
+		this.initiator = initiator;
+		this.responder = responder;
+		this.initiatorTurn = false;
+		this.bios = characterBios
+		this.lastDialogue = "";
+		this.assessment = {};
+	}
+
+	speaker() {
+		return this.initiatorTurn ? this.initiator : this.responder
+	}
+
+	listener() {
+		return this.initiatorTurn ? this.responder : this.initiator
+	}
+
+	nextTurn() {
+		this.initiatorTurn = !this.initiatorTurn;
+	}
+
+}
+
 class Simulation {
 	constructor(onCharacterUpdate, logAction, logConversation, setConversationActive, setLocked) {
 		this.onCharacterUpdate = onCharacterUpdate;
@@ -22,12 +49,7 @@ class Simulation {
 		this.characterBios = {}
 
 		this.conversationActive = false;
-		this.conversationHistory = [];
-		this.conversationInitiator = "";
-		this.conversationResponder = "";
-		this.conversationIsInitiatorTurn = false;
-		this.conversationTurnCount = 0;
-		
+		this.cc = null;
 	}
 
 	async loadConfiguration() {
@@ -133,33 +155,36 @@ class Simulation {
 	}
 
 	doAction(action) {
-		if (action.additionalEffects) {
-			this.runAdditionalEffects(action)
-		}
+
 		this.ensemble.doAction(action);
 
+		let bindings = action.goodBindings[0];
+		let initiator = bindings["initiator"];
+		let responder = bindings["responder"];
+		let format_data = {
+			"initiator": Utils.capitalize(initiator),
+			"responder": Utils.capitalize(responder),
+		};
 		let message = "...";
-		let name = "...";
 		if (action.successMessage) {
-			let bindings = action.goodBindings[0];
-			name = bindings["initiator"];
-			let format_data = {
-				"initiator": Utils.capitalize(bindings["initiator"]),
-				"responder": Utils.capitalize(bindings["responder"]),
-			};
 			message = Utils.format(action.successMessage, format_data)
 		}
-		this.logAction(name, action.name, message);
 
+		this.logAction(initiator, action.name, message);
 
 		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
 		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+
+		if (action.additionalEffects) {
+			this.runAdditionalEffects(action, initiator, responder)
+			return;
+		}
 	}
 
 	getActions(character) {
 		const intents = 5;
-		const actionsPerIntent = 10;
-		const actionsPerGroup = 10
+		const actionsPerIntent = 1;
+		const actionsPerGroup = 1;
 		let actionList = []
 		let characters = this.ensemble.getCharacters();
 		Utils.shuffle(characters);
@@ -194,21 +219,17 @@ class Simulation {
 
 	step() {
 		if (this.conversationActive) {
-			if (this.conversationIsInitiatorTurn) {
-				this.takeTurn(this.conversationInitiator);
-			}
-			else {
-				this.takeTurn(this.conversationResponder);
-			}
-			this.conversationIsInitiatorTurn = !this.conversationIsInitiatorTurn;
+			this.takeTurn(this.cc.speaker());
 		}
 		else if (this.turns.length > 0) {
 			let turn = this.turns.pop()
 			this.takeTurn(turn);
-			this.setLocked(false);
 		} else {
 			this.resetTurns();
 			this.nextTimeStep();
+		}
+
+		if (!this.conversationActive) {
 			this.setLocked(false);
 		}
 	}
@@ -223,29 +244,23 @@ class Simulation {
 	}
 	
 
-	runAdditionalEffects(action) {
-		let bindings = action.goodBindings[0];
-		let initiator = bindings["initiator"];
-		let responder = bindings["responder"];
+	runAdditionalEffects(action, initiator, responder) {
 
-		if (action.name === "FLIRT") {
-			this.startConversation(initiator, responder);
+		if ((action.name === "FLIRT") || (action.name === "CHAT") || (action.name === "CONFRONT")) {
+			this.startConversation(initiator, responder, action.name);
 		} 
 		else if (action.name === "TALK") {
-			this.continueConversation(initiator, responder);
+			this.continueConversation();
 		}
 		else if (action.name === "END") {
-			this.endConversation(initiator, responder);
+			this.endConversation();
 		}
 	}
 
-	startConversation(initiator, responder) {
+	startConversation(initiator, responder, actionType) {
 		this.conversationActive = true;
-		this.conversationHistory = [];
-		this.conversationInitiator = initiator;
-		this.conversationResponder = responder;
-		this.conversationTurnCount = 0;
 		this.setConversationActive(initiator, responder, true);
+		this.cc = new ConversationContext(initiator, responder, actionType, this.characterBios)
 		this.ensemble.set({
 			"category" : "relationship_status",
 			"type" : "in_conversation",
@@ -275,93 +290,78 @@ class Simulation {
 			"value" : 10
 		})
 
-		let prompt = PromptFactory.speakerPromptInitiate(
-			initiator,
-			responder,
-			this.getState(),
-			this.characterBios,
-		);
+		let prompt = PromptFactory.start(this.cc, this.getState());
 		console.log(prompt);
+		
+		let cleanup = () => {
+			this.cleanupBase();
+			this.setLocked(false);
+		}
 
-		this.dialogueExchange(initiator, responder, prompt,
-			(speaker, listener, dialogue) => {
-				this.conversationIsInitiatorTurn = false;
-				this.responseFunctionBase(speaker, listener, dialogue);
-			}
-		);
+		this.dialogueExchange(prompt, cleanup);
 	}
 
-	endConversation(initiator, responder) {
-		this.conversationActive = false;
-		this.conversationHistory = [];
-		this.conversationInitiator = "";
-		this.conversationResponder = "";
-		this.conversationTurnCount = 0;
-		let prompt = PromptFactory.speakerPromptEnd(
-			initiator,
-			responder,
-			this.conversationHistory,
+	endConversation() {
+		
+		let prompt = PromptFactory.end(
+			this.cc,
 			this.getState(),
-			this.characterBios
 		);
 
-		this.dialogueExchange(initiator, responder, prompt, 
-		(speaker, listener, dialogue) => {
+		let cleanup = () => {
 			this.ensemble.set({
 				"category" : "relationship_status",
 				"type" : "in_conversation",
-				"first" : initiator,
-				"second": responder,
-				"value" : false
-			})
-			this.ensemble.set({
-				"category" : "relationship_status",
-				"type" : "in_conversation",
-				"first" : responder,
-				"second": initiator,
-				"value" : false
-			})
-			this.ensemble.set({
-				"category" : "relationships",
-				"type" : "in_conversation",
-				"first" : initiator,
-				"second": responder,
+				"first" : this.cc.initiator,
+				"second": this.cc.responder,
 				"value" : false
 			})
 			this.ensemble.set({
 				"category" : "relationship_status",
 				"type" : "in_conversation",
-				"first" : initiator,
-				"second": responder,
+				"first" : this.cc.responder,
+				"second": this.cc.initiator,
 				"value" : false
 			})
-			this.responseFunctionBase(speaker, listener, dialogue);
-			this.setConversationActive(speaker, listener, false);
-		});
+			this.cleanupBase();
+			this.setConversationActive(this.cc.initiator, this.cc.responder, false);
+			this.conversationActive = false;
+			//this.cc = null;
+			this.setLocked(false);
+		};
+
+		this.dialogueExchange(prompt, cleanup);
+
 	}
 
-	continueConversation(speaker, listener) {
-		let prompt = PromptFactory.speakerPromptTalk(
-			speaker,
-			listener,
-			this.conversationHistory,
-			this.getState(),
-			this.characterBios
-		);
+	continueConversation() {
+		let prompt = PromptFactory.talk(this.cc, this.getState());
 		console.log(prompt);
-
-		this.dialogueExchange(speaker, listener, prompt, 
-		(speaker, listener, dialogue) => {
-			this.responseFunctionBase(speaker, listener, dialogue);
-		});
+		
+		let cleanup = () => {
+			this.ensemble.set({
+				"category" : "internal",
+				"type" : "conversation_interest",
+				"first" : this.cc.listener(),
+				"operator": "-",
+				"value" : 1
+			})
+			this.ensemble.set({
+				"category" : "internal",
+				"type" : "conversation_interest",
+				"first" : this.cc.speaker(),
+				"operator": "-",
+				"value" : 1
+			})
+			this.cleanupBase();
+			this.setLocked(false);
+		};
+		
+		this.dialogueExchange(prompt, cleanup)
 	}
 
-	async whatWouldThisLooklike(speaker, listener, cleanup) {
-		speaker()
-		.results() 
 
-	}
-	dialogueExchange(speaker, listener, prompt, responseFunction) {
+	dialogueExchange(prompt, cleanup) {
 		this.openAI.gptRequest(prompt)
 		.then((result) => {
 			console.log(result)
@@ -369,65 +369,55 @@ class Simulation {
 			if (dialogue.trim() === "") {
 				dialogue = "\"...\""
 			}
-			return dialogue;
-		}).then((dialogue) => {
-			this.listenerUpdate(speaker, listener, dialogue)
-			.then(() => {responseFunction(speaker, listener, dialogue)});
+			this.cc.lastDialogue = dialogue;
+		}).then(() => {
+			this.listenerUpdate().then(() => cleanup());
 		})
 	}
 
-	async responseFunctionBase(speaker, listener, dialogue) {
-		this.logConversation(speaker, dialogue);
-		this.conversationHistory.push([speaker, dialogue])
-		this.ensemble.set({
-			"category" : "internal",
-			"type" : "conversation_interest",
-			"first" : speaker,
-			"operator": "-",
-			"value" : 2
-		})
-		this.ensemble.set({
-			"category" : "internal",
-			"type" : "conversation_interest",
-			"first" : listener,
-			"operator": "-",
-			"value" : 2
-		})
+	cleanupBase() {
+		this.logConversation(this.cc.speaker(), this.cc.lastDialogue);
+		this.cc.history.push([this.cc.speaker(), this.cc.lastDialogue])
+		this.cc.nextTurn()
 		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
 		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
-		this.setLocked(false);
 	}
 
-	async listenerUpdate(speaker, listener, dialogue) {
+	async listenerUpdate() {
 
-		let prompt = PromptFactory.listenerPrompt(
-			speaker,
-			listener,
-			this.conversationHistory,
-			this.getState(),
-			this.characterBios,
-			dialogue,
-		)
+		let prompt = PromptFactory.listen(this.cc, this.getState())
 		return this.openAI.gptRequest(prompt)
 		.then((result) => {
 			console.log(result)
 			let assessment = result["data"]["choices"][0]["text"].trim().toLowerCase()
+			this.cc.assessment[this.cc.listener()] = assessment;
+			let property = "attraction"
+			if (this.cc.type === "CHAT") {
+				property = "friendship"
+			}
 			if (assessment === "negative") {
 				this.ensemble.set({
 					"category" : "feelings",
-					"type" : "attraction",
-					"first" : listener,
-					"second" : speaker,
+					"type" : property,
+					"first" : this.cc.listener(),
+					"second" : this.cc.speaker(),
 					"operator": "-",
 					"value" : 5,
+				})
+				this.ensemble.set({
+					"category" : "internal",
+					"type" : "conversation_interest",
+					"first" : this.cc.listener(),
+					"operator": "-",
+					"value" : 3
 				})
 			} 
 			else if (assessment === "positive") {
 				this.ensemble.set({
 					"category" : "feelings",
-					"type" : "attraction",
-					"first" : listener,
-					"second" : speaker,
+					"type" : property,
+					"first" : this.cc.listener(),
+					"second" : this.cc.speaker(),
 					"operator": "+",
 					"value" : 5,
 				})

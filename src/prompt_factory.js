@@ -3,12 +3,12 @@ import Utils from './utils.js'
 class PromptFactory {
 
 
-    static recapHistory(history) {
-        if (history.length === 0) {
+    static history(cc) {
+        if (cc.history.length === 0) {
             return "You just got their attention to start the conversation.\n"
         }
         let summary = "Recently in the conversation, the two of you have said:\n"
-        for (const entry of history) {
+        for (const entry of cc.history) {
             let speaker, dialogue;
             [speaker, dialogue] = entry;
             summary = summary + `${Utils.capitalize(speaker)}: ${dialogue}\n`;
@@ -16,7 +16,7 @@ class PromptFactory {
         return summary;
     }
 
-    static statusString(speaker, state) {
+    static status(state, speaker) {
         let mood = state[speaker]["self"]["mood"];
         let moodString = "normal mood"
         if (mood < 20) {
@@ -64,37 +64,54 @@ class PromptFactory {
 
     }
 //You are a ${speaker_gendered_descriptor} looking for the love of your life and television fame.
-    static baseSpeakerPrompt(speaker, state, characterData) {
+    static base(cc, state, speaker) {
         let speaker_gendered_descriptor = state[speaker].self.is_man ? "man" : "woman";
-        let good_traits = characterData[speaker].goodTraits;
-        let bad_traits = characterData[speaker].badTraits;
+        let good_traits = cc.bios[speaker].goodTraits;
+        let bad_traits = cc.bios[speaker].badTraits;
         return `You are ${Utils.capitalize(speaker)}, a 20-something ${speaker_gendered_descriptor} on a dramatic reality TV dating show.
 
 You think of yourself as ${good_traits[0].toLowerCase()} and ${good_traits[1].toLowerCase()}, but sometims you can be ${bad_traits[0].toLowerCase()} and ${bad_traits[1].toLowerCase()}.
 
-${PromptFactory.statusString(speaker, state)}`
+${PromptFactory.status(state, speaker)}`
 }
 
-    static speakerPromptTalk(speaker, listener, history, state, characterData) {
+    static assessment(cc, speaker) {
+        let as = cc.assessment[speaker];
+        if (as === "negative") {
+            return "You found the last thing they said off-putting."
+        }
+        if (as === "positive") {
+            return "You're enjoying the flow of conversation."
+        }
+        else {
+            return "You feel neutral about the conversation right now."
+        }
+    }
 
+    static talk(cc, state) {
+        let listener = cc.listener();
+        let speaker = cc.speaker();
         let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
-        let summary = PromptFactory.recapHistory(history)
-
-        return `${PromptFactory.baseSpeakerPrompt(speaker, state, characterData)}
+        let summary = PromptFactory.history(cc)
+        let speakerAssesm
+        return `${PromptFactory.base(cc, state, speaker)}
 
 Right now, you are flirting with ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to see if you have a connection.
 
 ${summary}
+${PromptFactory.assessment(cc, speaker)}
+
 What do you say next? Keep your response to at most 2 sentences, and remember to be dramatic for the camera.
 ${Utils.capitalize(speaker)}: `
 
     }
 
-    static speakerPromptInitiate(speaker, listener, state, characterData) {
-
+    static start(cc, state) {
+        let speaker = cc.speaker();
+        let listener = cc.listener();
         let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
     
-        return `${PromptFactory.baseSpeakerPrompt(speaker, state, characterData)}
+        return `${PromptFactory.base(cc, state, speaker)}
 
 You just approached ${Utils.capitalize(listener)}, a 20-something ${listener_gendered_descriptor}, to flirt.
 
@@ -107,11 +124,11 @@ Your response:
 ${Utils.capitalize(speaker)}: `
     }
 
-    static speakerPromptEnd(speaker, listener, history, state, characterData) {
-
-        let summary = PromptFactory.recapHistory(history)
-    
-        return `${PromptFactory.baseSpeakerPrompt(speaker, state, characterData)}
+    static end(cc, state) {
+        let speaker = cc.speaker();
+        let listener = cc.listener();
+        let summary = PromptFactory.history(cc)
+        return `${PromptFactory.base(cc, state, speaker)}
 You're talking with ${Utils.capitalize(listener)}, but want to end the conversation.
 
 ${summary}
@@ -124,11 +141,11 @@ Your response:
 ${Utils.capitalize(speaker)}: `
     }
 
-    static listenerPrompt(speaker, listener, history, state, characterData, dialogue) {
-
-    //let summary = PromptFactory.recapHistory(history)
-        return `${PromptFactory.baseSpeakerPrompt(listener, state, characterData)}
-You're talking with ${Utils.capitalize(speaker)}, and need to decide how you feel about them.
+    static listen(cc, state) {
+        let speaker = cc.speaker();
+        let listener = cc.listener();
+        return `${PromptFactory.base(cc, state, listener)}
+You're talking with ${Utils.capitalize(speaker)}, and need to decide how you feel about them; ${PromptFactory.assessment(cc, speaker)}
 
 For each of ${Utils.capitalize(speaker)}'s comments, you have to decide how you feel.
 Do you think what ${Utils.capitalize(speaker)} makes you feel positive, negative, or neutral? Examples:
@@ -145,16 +162,11 @@ Evaluation: Neutral
 Statement: "What are your interests?"
 Evaluation: Neutral
 
-The following is  ${Utils.capitalize(speaker)}'s latest comment. How does it make you feel? Be negative more often than not.
+The following is ${Utils.capitalize(speaker)}'s latest comment. How does it make you feel? Be negative more often than not.
 
-Statement: ${dialogue}
+Statement: ${cc.lastDialogue}
 Evaluation: `
     }
-
-
-
-
-
 
 }
 

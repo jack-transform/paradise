@@ -69,7 +69,7 @@
 		{
 			"name" : "CHAT",
 			"displayName" : "Chat",
-			"successMessage" : "{initiator} and {responder} talked for a bit.",
+			"successMessage" : "{initiator} started a friendly chat with {responder}.",
 			"isAccept" : true,
 			"conditions" : [],
 			"influenceRules" : [],

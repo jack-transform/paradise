@@ -51,7 +51,8 @@
 				"attraction",
 				"jealousy",
 				"love",
-				"frustration"
+				"frustration",
+				"conversations"
 			],
 			"defaultValue": 0,
 			"maxValue": 100,
