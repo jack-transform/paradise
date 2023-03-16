@@ -73,21 +73,8 @@
 			"isAccept" : true,
 			"conditions" : [],
 			"influenceRules" : [],
-			"effects" : [{
-				"category" : "feelings",
-				"type" : "friendship",
-				"first" : "initiator",
-				"second" : "responder",
-				"operator" : "+",
-				"value" : 10
-			},{
-				"category" : "feelings",
-				"type" : "friendship",
-				"first" : "responder",
-				"second" : "initiator",
-				"operator" : "+",
-				"value" : 10
-			}]
+			"effects" : [],
+			"additionalEffects": true
 		},
 		{
 			"name" : "FLIRT",
@@ -96,21 +83,17 @@
 			"isAccept" : true,
 			"conditions" : [],
 			"influenceRules" : [],
-			"effects" : [{
-				"category" : "feelings",
-				"type" : "attraction",
-				"first" : "initiator",
-				"second" : "responder",
-				"operator" : "+",
-				"value" : 10
-			},{
-				"category" : "feelings",
-				"type" : "attraction",
-				"first" : "responder",
-				"second" : "initiator",
-				"operator" : "+",
-				"value" : 10
-			}],
+			"effects" : [],
+			"additionalEffects": true
+		},
+		{
+			"name" : "CONFRONT",
+			"displayName" : "Confront",
+			"successMessage" : "{initiator} confronted {responder}.",
+			"isAccept" : true,
+			"conditions" : [],
+			"influenceRules" : [],
+			"effects" : [],
 			"additionalEffects": true
 		},
 		{
@@ -144,6 +127,55 @@
 				}
 			],
 		    "additionalEffects": false
+		},
+		{
+			"name" : "CONTINUE_CONVERSATION",
+			"intent" : {
+				"category" : "relationship_status",
+				"type" : "in_conversation",
+				"intentType" : true,
+				"first" : "initiator",
+				"second": "responder"
+			},
+			"conditions" : [],
+			"influenceRules" : [],
+			"leadsTo" : ["TALK", "END"]
+		},
+		{
+			"name" : "TALK",
+			"displayName" : "TALK",
+			"successMessage" : "{initiator} continued the conversation with {responder}.",
+			"isAccept" : true,
+			"conditions" : [
+				{
+					"category": "internal",
+					"type": "conversation_interest",
+					"first": "initiator",
+					"operator": ">",
+					"value": 0
+				}
+			],
+			"influenceRules" : [],
+			"effects" : [],
+			"additionalEffects": true
+		},
+		{
+			"name" : "END",
+			"displayName" : "END",
+			"successMessage" : "{initiator} ended the conversation with {responder}.",
+			"isAccept" : true,
+			"conditions" : [
+				{
+					"category": "internal",
+					"type": "conversation_interest",
+					"first": "initiator",
+					"operator": "<",
+					"value": 2
+				}
+			],
+			"influenceRules" : [],
+			"effects" : [],
+			"additionalEffects": true
 		}
 	]
 }

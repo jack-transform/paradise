@@ -194,16 +194,22 @@ class Simulation {
 
 	step() {
 		if (this.conversationActive) {
-			this.conversationStep();
+			if (this.conversationIsInitiatorTurn) {
+				this.takeTurn(this.conversationInitiator);
+			}
+			else {
+				this.takeTurn(this.conversationResponder);
+			}
+			this.conversationIsInitiatorTurn = !this.conversationIsInitiatorTurn;
 		}
 		else if (this.turns.length > 0) {
-			this.setLocked(false);
 			let turn = this.turns.pop()
 			this.takeTurn(turn);
-		} else {
 			this.setLocked(false);
+		} else {
 			this.resetTurns();
 			this.nextTimeStep();
+			this.setLocked(false);
 		}
 	}
 
@@ -216,13 +222,21 @@ class Simulation {
 		Utils.shuffle(this.turns)
 	}
 	
-	resetConversation () {
-		this.conversationActive = false;
-		this.conversationHistory = [];
-		this.conversationInitiator = "";
-		this.conversationResponder = "";
-		this.conversationIsInitiatorTurn = true;
-		this.conversationTurnCount = 0;
+
+	runAdditionalEffects(action) {
+		let bindings = action.goodBindings[0];
+		let initiator = bindings["initiator"];
+		let responder = bindings["responder"];
+
+		if (action.name === "FLIRT") {
+			this.startConversation(initiator, responder);
+		} 
+		else if (action.name === "TALK") {
+			this.continueConversation(initiator, responder);
+		}
+		else if (action.name === "END") {
+			this.endConversation(initiator, responder);
+		}
 	}
 
 	startConversation(initiator, responder) {
@@ -233,16 +247,111 @@ class Simulation {
 		this.conversationIsInitiatorTurn = true;
 		this.conversationTurnCount = 0;
 		this.setConversationActive(initiator, responder, true);
+		this.ensemble.set({
+			"category" : "relationship_status",
+			"type" : "in_conversation",
+			"first" : initiator,
+			"second": responder,
+			"value" : true
+		})
+		this.ensemble.set({
+			"category" : "relationship_status",
+			"type" : "in_conversation",
+			"first" : responder,
+			"second": initiator,
+			"value" : true
+		})
+		this.ensemble.set({
+			"category" : "internal",
+			"type" : "conversation_interest",
+			"first" : initiator,
+			"operator": "=",
+			"value" : 10
+		})
+		this.ensemble.set({
+			"category" : "internal",
+			"type" : "conversation_interest",
+			"first" : responder,
+			"operator": "=",
+			"value" : 10
+		})
+		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
+		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+		this.setLocked(false);
 	}
 
-	runAdditionalEffects(action) {
-		let bindings = action.goodBindings[0];
-		let initiator = bindings["initiator"];
-		let responder = bindings["responder"];
+	endConversation(initiator, responder) {
+		this.conversationActive = false;
+		this.conversationHistory = [];
+		this.conversationInitiator = "";
+		this.conversationResponder = "";
+		this.conversationTurnCount = 0;
+		this.setConversationActive(initiator, responder, false);
+		this.ensemble.set({
+			"category" : "relationship_status",
+			"type" : "in_conversation",
+			"first" : initiator,
+			"second": responder,
+			"value" : false
+		})
+		this.ensemble.set({
+			"category" : "relationship_status",
+			"type" : "in_conversation",
+			"first" : responder,
+			"second": initiator,
+			"value" : false
+		})
+		this.ensemble.runTriggerRules(this.ensemble.getCharacters());
+		this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+		this.setLocked(false);
+	}
 
-		if (action.name === "FLIRT") {
-			this.startConversation(initiator, responder);
-		}
+	continueConversation(speaker, listener) {
+		let prompt = PromptFactory.speakerPromptFlirt(
+			speaker,
+			listener,
+			this.conversationHistory,
+			this.getState(),
+			this.characterBios
+		);
+
+		this.dialogueExchange(speaker, listener, prompt, () => {})
+	}
+
+	dialogueExchange(speaker, listener, prompt, responseFunction) {
+
+		this.openAI.gptRequest(prompt)
+		.then((result) => {
+			console.log(result)
+			let dialogue = result["data"]["choices"][0]["text"]
+			if (dialogue.trim() === "") {
+				dialogue = "\"...\""
+			}
+			return dialogue;
+		}).then((dialogue) => {
+			responseFunction(speaker, listener, dialogue);
+			return dialogue;
+		}).then((dialogue) => {
+			this.logConversation(speaker, dialogue);
+			this.conversationHistory.push([speaker, dialogue])
+			this.setLocked(false);
+			this.ensemble.set({
+				"category" : "internal",
+				"type" : "conversation_interest",
+				"first" : speaker,
+				"operator": "-",
+				"value" : 2
+			})
+			this.ensemble.set({
+				"category" : "internal",
+				"type" : "conversation_interest",
+				"first" : listener,
+				"operator": "-",
+				"value" : 2
+			})
+			this.ensemble.runTriggerRules(this.ensemble.getCharacters());
+			this.volitions = this.ensemble.calculateVolition(this.ensemble.getCharacters())
+		});
 	}
 
 	conversationStep() {
@@ -252,26 +361,6 @@ class Simulation {
 			speaker = this.conversationInitiator;
 			listener = this.conversationResponder;
 		}
-		let prompt = PromptFactory.speakerPromptFlirt(
-			speaker,
-			listener,
-			this.conversationHistory,
-			this.getState(),
-			this.characterBios
-		);
-		
-		this.openAI.gptRequest(prompt).then((result) => {
-			console.log(result)
-			let dialogue = result["data"]["choices"][0]["text"]
-			if (dialogue.trim() === "") {
-				dialogue = Utils.sample(["Wow.", "Interesting."], 1)[0]
-			}
-			this.logConversation(speaker, dialogue);
-			this.conversationHistory.push([speaker, dialogue])
-			this.conversationIsInitiatorTurn = !this.conversationIsInitiatorTurn;
-			this.setLocked(false);
-		});
-
 	}
 }
 

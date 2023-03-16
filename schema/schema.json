@@ -28,6 +28,20 @@
 		},
 		{
 			"actionable": true,
+			"directionType": "undirected",
+			"isBoolean": false,
+			"cloneEachTimeStep": true,
+			"category": "internal",
+			"types": [
+				"location",
+				"conversation_interest"
+			],
+			"defaultValue": 0,
+			"maxValue": 100,
+			"minValue": 0
+		},
+		{
+			"actionable": true,
 			"directionType": "directed",
 			"isBoolean": false,
 			"cloneEachTimeStep": true,
@@ -50,24 +64,12 @@
 			"cloneEachTimeStep": true,
 			"category": "relationship_status",
 			"types": [
+				"in_conversation",
 				"are_friends",
 				"are_together",
 				"are_flirting",
 				"are_in_love",
 				"are_fighting"
-			],
-			"defaultValue": false
-		},
-		{
-			"actionable": true,
-			"directionType": "undirected",
-			"isBoolean": true,
-			"cloneEachTimeStep": true,
-			"category": "location_status",
-			"types": [
-				"at_pool",
-				"at_bar",
-				"at_beach"
 			],
 			"defaultValue": false
 		}

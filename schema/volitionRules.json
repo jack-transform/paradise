@@ -104,6 +104,31 @@
 			"origin": "volitionRules",
 			"id": "volitionRules_4",
 			"type": "volition"
+		}, 
+		{
+			"name": "People want to to contine their conversations.",
+			"conditions": [
+				{
+					"category": "relationship_status",
+					"type": "in_conversation",
+					"first": "someone",
+					"second": "other",
+					"value": true
+				}
+			],
+			"effects": [
+				{
+					"category": "relationship_status",
+					"type": "in_conversation",
+					"first": "someone",
+					"second": "other",
+					"weight": 1000,
+					"intentType": true
+				}
+			],
+			"origin": "volitionRules",
+			"id": "volitionRules_4",
+			"type": "volition"
 		}
 	]
 }

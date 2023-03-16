@@ -16,24 +16,24 @@ class PromptFactory {
         return summary;
     }
 
+    static baseSpeakerPrompt(speaker, state, characterData) {
+        let speaker_gendered_descriptor = state[speaker].self.is_man ? "man" : "woman";
+        let good_traits = characterData[speaker].goodTraits;
+        let bad_traits = characterData[speaker].goodTraits;
+        return `You are ${speaker}, a 20-something contestant on a dramatic reality TV dating show.
+        You are a ${speaker_gendered_descriptor} looking for the love of your life and television fame.
+        Your think of yourself as ${good_traits[0]} and ${good_traits[1]}, but those who've gotten on your bad side might describe you as ${bad_traits[0]} and ${bad_traits[1]}`
+    }
 
     static speakerPromptFlirt(speaker, listener, history, state, characterData) {
 
-        let speaker_gendered_descriptor = state[speaker].self.is_man ? "man" : "woman";
         let listener_gendered_descriptor = state[listener].self.is_man ? "man" : "woman";
-        let good_traits = characterData[listener].goodTraits;
-        let bad_traits = characterData[listener].goodTraits;
-
         let summary = PromptFactory.recapHistory(history)
 
-        return `You are ${speaker}, a 20-something contestant on a dramatic reality TV dating show.
-You are a ${speaker_gendered_descriptor} looking for the love of your life and television fame.
-Your think of yourself as ${good_traits[0]} and ${good_traits[1]}, but those who've gotten on your bad side might describe you as ${bad_traits[0]} and ${bad_traits[1]}
-
+        return `${PromptFactory.baseSpeakerPrompt(speaker, state, characterData)}
 Right now, you are flirting with ${listener}, a 20-something ${listener_gendered_descriptor}, to see if you have a connection.
-
 ${summary}
-What do you say next? Keep response to at most 2 sentences.
+What do you say next? Keep your response to at most 2 sentences, and remember to be dramatic for the camera.
 ${Utils.capitalize(speaker)}: `
 
     }
