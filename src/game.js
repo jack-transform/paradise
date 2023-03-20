@@ -11,6 +11,13 @@ class Game {
             (locked) => this.setLocked(locked),
         )
         this.ui = new UIManager(() => this.step());
+        document.getElementById("setKey").onclick = () => this.onKeySet();
+    }
+
+    onKeySet() {
+        key = document.getElementById("keyfield").value
+        this.simulation.openAI.setKey(key);
+        console.log("KEY SET");
     }
 
     async initialize() {
