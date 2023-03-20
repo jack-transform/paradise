@@ -9,12 +9,5 @@ document.onreadystatechange = function () {
 	game.initialize().then(() => {
 		console.log("READY");
 	});
-    prompt = new OpenAI();
-    prompt.initialize().then(() => {
-		console.log("READY P ");
-        prompt.gptRequest("The capital of Egypt is").then(function(result) {
-            console.log(result);
-        });
-	});
   }
 }
