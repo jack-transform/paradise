@@ -5,20 +5,23 @@ class OpenAI {
         this.OpenAI = null;
     }
     
+    setKey(key) {
+        this.API_KEY = key;
+        this.OpenAI = axios.create({
+            baseURL: 'https://api.openai.com/v1/',
+            timeout: 100000,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': "*",
+              'Authorization': 'Bearer ' + key
+            }
+        });
+    }
     async initialize() {
         return fetch('data/.secrets.json')
         .then((response) => response.json())
         .then(function (json) {
-            this.API_KEY = json.API_KEY;
-            this.OpenAI = axios.create({
-                baseURL: 'https://api.openai.com/v1/',
-                timeout: 100000,
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Access-Control-Allow-Origin': "*",
-                  'Authorization': 'Bearer ' + this.API_KEY
-                }
-            });
+            this.setKey(key);
         }.bind(this));
     }
 
