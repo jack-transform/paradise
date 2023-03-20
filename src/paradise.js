@@ -5,7 +5,7 @@ var game;
 document.onreadystatechange = function () {
   if (document.readyState == "complete") {
     game = new Game();
-    Window.GAME = game;
+    window.game = game;
     game.initialize().then(() => {
       console.log("READY");
     });
