@@ -18,7 +18,7 @@ class OpenAI {
         });
     }
     async initialize() {
-        return fetch('data/.secrets.json')
+        return fetch('./data/.secrets.json')
         .then((response) => response.json())
         .then(function (json) {
             this.setKey(key);

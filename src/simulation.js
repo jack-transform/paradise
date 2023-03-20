@@ -165,7 +165,7 @@ class Simulation {
 		return Promise.all([
 			this.loadConfiguration(),
 			this.loadCharacterFactory(),
-			this.openAI.initialize(), 
+			//this.openAI.initialize(), 
 		]).then(function () {
 			this._loadStatePrototypes();
 			this.setStartingConditions();
