@@ -1,43 +1,38 @@
 <!DOCTYPE html>
 
 <html>
-<head>
-	<title>Paradise-Mini</title>
-	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-	<script src="ensemble.js"></script>
-	<script type="module" src="src/paradise.js"></script>
-	<link rel="stylesheet" type="text/css" href="styles.css">
-	<!-- Scale page to the device width instead of trying to zoom out --> 
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <title>Paradise-Mini</title>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="ensemble.js"></script>
+        <script type="module" src="src/paradise.js"></script>
+        <link rel="stylesheet" type="text/css" href="styles.css" />
+        <!-- Scale page to the device width instead of trying to zoom out -->
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <body>
+        <div id="titleDiv" class="column">
+            <h1>🌴 Paradise 🍹</h1>
+            <p>A minimal simulation of Bachelor in Paradise</p>
+        </div>
 
-</head>
-<body>
-	<div id="titleDiv" class="column">
-		<h1>🌴 Paradise-Mini 🍹</h1>
-		<p>A minimal simulation of Bachelor in Paradise</p>
-	</div>
+        <button id="stepButton">Step</button>
+        <div id="status-container" class="row">
+            <div id="action-log" class="column">
+                <div id="action-log-label"><b>Actions</b></div>
+                <div id="action-container" class="column"></div>
+            </div>
+            <div id="conversation-log" class="column">
+                <div id="conversation-log-label"><b>Conversations</b></div>
+                <div id="conversation-container" class="column"></div>
+            </div>
+        </div>
+        <div id="characterContainer" class="row"></div>
 
-	<button id="stepButton">Step</button>
-	<div id="status-container" class="row">
-		<div id="action-log" class="column">
-			<div id="action-log-label"><b>Actions</b></div>
-			<div id="action-container" class="column">
-			</div>
-		</div>
-		<div id="conversation-log" class="column">
-			<div id="conversation-log-label"><b>Conversations</b></div>
-			<div id="conversation-container" class="column">
-			</div>
-		</div>
-	</div>
-	<div id="characterContainer" class="row">
-	</div>
-
-	<div>
-		API_KEY
-		<input type="text" id="keyfield"><br><br>
-		<button id="setKey">SET</button>
-	</div>
-
-</body>
+        <div>
+            API_KEY
+            <input type="text" id="keyfield" /><br /><br />
+            <button id="setKey">SET</button>
+        </div>
+    </body>
 </html>
